@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Predicted AQI</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+</head>
+
+<body class="bg-slate-50 min-h-screen px-6 pt-8">
+
+<!-- Back -->
+<button onclick="history.back()" class="mb-6">
+  <span class="material-symbols-outlined text-3xl">arrow_back</span>
+</button>
+
+<h1 class="text-3xl font-extrabold mb-2">Predicted AQI</h1>
+<p class="text-gray-500 mb-6">Next 24 hours (AI Model)</p>
+
+<!-- Prediction Cards -->
+<div class="flex gap-4 overflow-x-auto pb-4">
+
+  <div class="min-w-[120px] bg-white p-4 rounded-2xl shadow text-center">
+    <p class="text-xs text-gray-400">+1 Hour</p>
+    <p class="text-3xl font-black text-red-600">510</p>
+    <p class="text-xs font-bold text-red-500">Hazardous</p>
+  </div>
+
+  <div class="min-w-[120px] bg-white p-4 rounded-2xl shadow text-center">
+    <p class="text-xs text-gray-400">+2 Hours</p>
+    <p class="text-3xl font-black text-red-600">495</p>
+    <p class="text-xs font-bold text-red-500">Hazardous</p>
+  </div>
+
+  <div class="min-w-[120px] bg-white p-4 rounded-2xl shadow text-center">
+    <p class="text-xs text-gray-400">+3 Hours</p>
+    <p class="text-3xl font-black text-orange-500">460</p>
+    <p class="text-xs font-bold text-orange-500">Very Poor</p>
+  </div>
+
+</div>
+
+<!-- Info -->
+<div class="mt-6 text-xs text-gray-400">
+  Predictions generated using ML model trained on AQI + weather data.
+</div>
+
+</body>
+</html>

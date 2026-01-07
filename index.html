@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Air Quality</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Firebase SDK -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import { getFirestore, collection, query, orderBy, limit, getDocs } 
+  from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+  // 🔥 REPLACE WITH YOUR FIREBASE CONFIG
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT.firebaseapp.com",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_PROJECT.appspot.com",
+    messagingSenderId: "XXXX",
+    appId: "XXXX"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  window.getPrediction = async function () {
+    const q = query(
+      collection(db, "aqi_predictions"),
+      orderBy("timestamp", "desc"),
+      limit(1)
+    );
+
+    const snapshot = await getDocs(q);
+    snapshot.forEach(doc => {
+      document.getElementById("predictedAQI").innerText =
+        "AI Prediction: " + doc.data().aqi_category;
+    });
+  };
+</script>
+
+<style>
+  .ring {
+    stroke-dasharray: 326;
+    stroke-dashoffset: 326;
+    transition: stroke-dashoffset 1.5s ease;
+  }
+</style>
+</head>
+
+<body class="bg-white min-h-screen flex flex-col items-center px-5 pt-8">
+
+<!-- AQI GAUGE -->
+<div class="relative w-64 h-64">
+  <svg viewBox="0 0 120 120" class="rotate-[-90deg]">
+    <circle cx="60" cy="60" r="52" stroke="#e5e7eb" stroke-width="8" fill="none"/>
+    <circle id="ring" cx="60" cy="60" r="52"
+      stroke="#dc2626"
+      stroke-width="8"
+      fill="none"
+      stroke-linecap="round"
+      class="ring"/>
+  </svg>
+
+  <div class="absolute inset-0 flex flex-col items-center justify-center">
+    <p class="text-xs text-gray-400">LIVE AQI</p>
+    <h1 id="aqiValue" class="text-6xl font-black text-red-600">--</h1>
+    <span id="aqiLabel"
+      class="mt-2 px-4 py-1 rounded-full bg-red-100 text-red-700 text-xs font-bold">
+      Loading
+    </span>
+  </div>
+</div>
+
+<!-- TEXT -->
+<h2 id="statusText" class="mt-6 text-2xl font-bold text-gray-800">
+  Fetching air quality...
+</h2>
+<p id="adviceText" class="text-gray-500 text-sm mt-1 text-center">
+  Please wait
+</p>
+
+<!-- AI PREDICTION -->
+<p id="predictedAQI" class="mt-4 text-sm text-blue-600 font-semibold">
+  AI Prediction: --
+</p>
+
+<!-- BUTTONS -->
+<div class="w-full max-w-sm mt-8 space-y-4">
+
+  <button onclick="location.href='prediction.html'"
+    class="w-full h-14 bg-blue-600 text-white rounded-full font-bold shadow">
+    Predicted AQI
+  </button>
+
+  <button onclick="location.href='map.html'"
+    class="w-full h-14 bg-gray-100 rounded-full font-bold">
+    Local Area Map
+  </button>
+
+  <button onclick="location.href='SafetyTips.html'"
+    class="w-full h-14 bg-green-100 text-green-800 rounded-full font-bold">
+    What should I do?
+  </button>
+</div>
+
+<script>
+const API_KEY = "9e35705badede419febd5045fcc81c07";
+const LAT = 28.6139;
+const LON = 77.2090;
+
+async function fetchAQI() {
+  const res = await fetch(
+    `https://api.openweathermap.org/data/2.5/air_pollution?lat=${LAT}&lon=${LON}&appid=${API_KEY}`
+  );
+  const data = await res.json();
+  const aqi = data.list[0].main.aqi;
+
+  let value, label, color, advice;
+
+  if (aqi === 1) {
+    value = 50; label = "Good"; color = "green"; advice = "Air is clean 🌱";
+  } else if (aqi === 2) {
+    value = 100; label = "Moderate"; color = "yellow"; advice = "Sensitive people take care";
+  } else if (aqi === 3) {
+    value = 200; label = "Poor"; color = "orange"; advice = "Limit outdoor activities";
+  } else if (aqi === 4) {
+    value = 300; label = "Very Poor"; color = "red"; advice = "Wear mask outdoors";
+  } else {
+    value = 450; label = "Severe"; color = "red"; advice = "Stay indoors 🚨";
+  }
+
+  document.getElementById("aqiValue").innerText = value;
+  document.getElementById("aqiLabel").innerText = label;
+  document.getElementById("statusText").innerText = `Air Quality is ${label}`;
+  document.getElementById("adviceText").innerText = advice;
+
+  document.getElementById("ring").style.strokeDashoffset =
+    326 - (value / 500) * 326;
+}
+
+fetchAQI();
+getPrediction();
+</script>
+
+</body>
+<script type="module">
+  // 🔥 Firebase SDKs
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+  // ✅ Your Firebase config (USE YOUR REAL ONE)
+  const firebaseConfig = {
+    apiKey: "YOUR_FIREBASE_API_KEY",
+    authDomain: "twilight-pollution-ai.firebaseapp.com",
+    projectId: "twilight-pollution-ai",
+    storageBucket: "twilight-pollution-ai.appspot.com",
+    messagingSenderId: "XXXX",
+    appId: "XXXX"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  async function getPrediction() {
+    try {
+      const querySnapshot = await getDocs(collection(db, "aqi_predictions"));
+
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+
+        // 🔥 Update UI
+        document.querySelector("h1").innerText = "AI";
+        document.querySelector("span").innerText = data.aqi_category;
+        document.querySelector("h2").innerText = `AI Prediction for ${data.location}`;
+        document.querySelector("p").innerText = "Prediction generated by trained ML model";
+      });
+
+    } catch (error) {
+      console.error("Error fetching AI prediction:", error);
+    }
+  }
+
+  // 🚀 Call it on load
+  getPrediction();
+</script>
+
+</html>
